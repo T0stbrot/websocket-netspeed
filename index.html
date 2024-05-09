@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <title>Netspeed</title>
+    <style>
+        body {
+            background-color: #11111C;
+            color: #FFFFFF;
+            font-family:Poppins,'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .content {
+            background-color: #1F2033;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            margin-right: -50%;
+            transform: translate(-50%, -50%);
+            border-radius: 5px;
+            padding: 10px;
+            min-width: 40%;
+            text-align: center;
+        }
+        .progress-bar {
+    width: 100%;
+    background-color: #1F2033;
+    border: 2px solid #0076F5;
+    border-radius: 5px;
+    margin-bottom: 10px;
+  }
+
+  .progress-bar-inner {
+    font-size: medium;
+    font-weight: 400;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    border-radius: 5px;
+    background-color: #0076F5;
+    transition: width 0.5s ease;
+  }
+  .progress-label {
+    font-weight: 600;
+    font-size: x-large;
+  }
+    </style>
+</head>
+<body>
+
+<div class="content">
+    <h1>VPN Usage</h1>
+    <hr style="background-color: #FFFFFF;">
+    <span class="progress-label">Download</span>
+    <div class="progress-bar">
+        <div id="progress1" class="progress-bar-inner"></div>
+    </div>
+    <br>
+    <span class="progress-label">Upload</span>
+    <div class="progress-bar">
+        <div id="progress2" class="progress-bar-inner"></div>
+    </div>
+</div>
+
+    <script>
+        function updateProgressBar(progressId, value) {
+        value = Math.min(value, 1000);
+  
+        value = parseFloat(value.toFixed(2));
+  
+        var progressBar = document.getElementById(progressId);
+        progressBar.style.width = (value / 1000) + '%';
+        progressBar.innerText = value + "Mbit/s";
+        }
+        
+        const socket = new WebSocket('wss://your.domain:3000');
+
+        socket.addEventListener('message', function (event) {
+            const data = JSON.parse(event.data);
+            console.log(data[0].tx);
+            updateProgressBar('progress1', data[0].tx);
+            updateProgressBar('progress2', data[0].rx);
+        });
+
+        function updateBars(data) {
+            // Update transmission bar
+            const txFill = document.querySelector('.tx-fill');
+            const txSpeed = document.querySelector('.tx-speed');
+            const txPercentage = (data.tx / 1000) * 100;
+            txFill.style.width = `${txPercentage}%`;
+            txSpeed.textContent = data.tx;
+
+            // Update reception bar
+            const rxFill = document.querySelector('.rx-fill');
+            const rxSpeed = document.querySelector('.rx-speed');
+            const rxPercentage = (data.rx / 1000) * 100;
+            rxFill.style.width = `${rxPercentage}%`;
+            rxSpeed.textContent = data.rx;
+        }
+    </script>
+</body>
+</html>
